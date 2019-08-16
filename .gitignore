@@ -1,2 +1,4 @@
 .env
 storage/
+.DS_Store
+.idea/

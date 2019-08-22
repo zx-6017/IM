@@ -7,10 +7,10 @@ import (
 
 func Router(router *gin.Engine){
 
-	api := router.Group("/api")
-	{
-		api.GET("/create",controllers.Create);
-	}
+	//api := router.Group("/api")
+	//{
+		router.GET("/api/create",controllers.Create);
+	//}
 
 
 }

@@ -3,8 +3,7 @@ package main
 import (
 	"IM/routers"
 	"github.com/gin-gonic/gin"
-	"io"
-	"os"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 )
 
 func main(){
@@ -17,8 +16,10 @@ func main(){
 
 	// Log to a file
 	//gin.DisableConsoleColor()
-	log_file,_ := os.Create("./storage/logs/zx.gin.com.log")
-	gin.DefaultWriter = io.MultiWriter(log_file)
+	//log_file,_ := os.Create("./storage/logs/zx.gin.com.log")
+	//gin.DefaultWriter = io.MultiWriter(log_file)
+
+
 
 	//引入路由
 	routers.Router(service);

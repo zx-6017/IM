@@ -1,23 +1,11 @@
 package controllers
 
 import (
-	"fmt"
+	"IM/models"
 	"github.com/gin-gonic/gin"
-	"github.com/golang/protobuf/ptypes/timestamp"
-
-	//"github.com/golang/protobuf/ptypes/timestamp"
-	"github.com/jinzhu/gorm"
 )
 
-type Admin_im_info struct {
-	Id uint `gorm:"primary_key"`
-	App_id string `json:"app_id"`
-	Identifier string `json:"identifier"`
-	Usersig string `json:"usersig"`
-	Overtime string `json:"overtime"`
-	Created_at timestamp.Timestamp `json:"created_at"`
-	Updated_at timestamp.Timestamp `json:"updated_at"`
-}
+
 
 func Create(request *gin.Context){
 	id, exist := request.GetQuery("id")
@@ -29,23 +17,23 @@ func Create(request *gin.Context){
 	if !exist{
 		info = "info is not exist"
 	}
-	//初始化 数据库
-	db,err := gorm.Open("mysql","root:mysqlpasswd@/yome?charset=utf8&parseTime=True&loc=Local")
 
-	if err != nil {
-		fmt.Println(err)
+	admin_im_info := models.Admin_im_info{}
+
+	//向admin_im_info插入一条信息
+	insert_adminImInfo_info := models.Admin_im_info{
+		App_id:"app_id",
+		Identifier:"identify",
 	}
-	db.SingularTable(true)
-	defer db.Close()
+	admin_im_info.CreateAdminImInfo(&insert_adminImInfo_info)
 
-	insert_info := Admin_im_info{App_id:"app_id",Identifier:"identify"}
-	fmt.Println(insert_info)
-	db.Create(&insert_info)
+	//从user_info 获取信息
+
 
 	request.JSON(200,gin.H{
 		"id":id,
 		"info":info,
-		"msg":insert_info.Id,
+		"admin_info_id":insert_adminImInfo_info.Id,
 	})
 
 

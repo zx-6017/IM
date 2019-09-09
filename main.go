@@ -1,9 +1,11 @@
 package main
 
 import (
+	"IM/helpers"
 	"IM/routers"
+	"github.com/astaxie/beego/logs"
 	"github.com/gin-gonic/gin"
-	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"log"
 )
 
 func main(){
@@ -14,18 +16,22 @@ func main(){
 	service.Use(gin.Recovery());
 
 
-	// Log to a file
-	//gin.DisableConsoleColor()
-	//log_file,_ := os.Create("./storage/logs/zx.gin.com.log")
-	//gin.DefaultWriter = io.MultiWriter(log_file)
 
 
+	err := logs.SetLogger(logs.AdapterFile,`{"filename":"./storage/logs/im.log","daily":true,"color":true}`)
 
+	if err != nil {
+		log.Fatalln("Log init failed, err:"+err.Error())
+	}
+	//logs.EnableFuncCallDepth(false) //输出调用的文件名 行号
+
+	defer helpers.DB.Close()
 	//引入路由
-	routers.Router(service);
-
+	routers.Router(service)
 	//服务启动
-	service.Run(":8080");
+	service.Run(":8080")
+
+
 
 
 

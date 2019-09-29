@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	."IM/config"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"log"
@@ -16,34 +17,31 @@ func initDB(){
 	var db *gorm.DB
 
 	var(
-		dialect = "mysql"
-		host = "localhost"
-		port = "3306"
-		username = "root"
-		passwd = "mysqlpasswd"
-		database = "yome"
-		charset = "utf8"
+		dialect = Conf.String("DB_DIALECT")
+		host = Conf.String("DB_HOST")
+		port = Conf.String("DB_PORT")
+		username = Conf.String("DB_USERNAME")
+		passwd = Conf.String("DB_PASSWORD")
+		database = Conf.String("DB_DATABASE")
+		charset = Conf.String("DB_CHARSET")
+		parseTime = Conf.String("DB_PARSETIME")
+		loc = Conf.String("DB_LOC")
 	)
-
-	dsn := username+":"+passwd+"@tcp("+host+":"+port+")/"+database+"?charset="+charset+"&parseTime=True&loc=Local"
+	dsn := username+":"+passwd+"@tcp("+host+":"+port+")/"+database+"?charset="+charset+"&parseTime="+parseTime+"&loc="+loc
 	db,mysql_err := gorm.Open(dialect,dsn)
 
 	if mysql_err != nil {
-		//logs.Error("init DB connect failed, error: %s",mysql_err.Error())
 		log.Fatalln("init DB connect failed, error: %s",mysql_err.Error())
 	}
 	mysql_err = db.DB().Ping()
 	if mysql_err != nil{
-		//logs.Error("init DB connect ping failed, error: %s",mysql_err.Error())
 		log.Fatalln("init DB connect failed, error: %s",mysql_err.Error())
 	}else{
 		DB = db
-		//logs.Info("init DB connect success")
 		log.Println("init DB connect success")
 	}
-
+	db.LogMode(true)
 	db.SingularTable(true)
-	//defer db.Close()
 
 
 

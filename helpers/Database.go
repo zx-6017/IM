@@ -40,7 +40,7 @@ func initDB(){
 		DB = db
 		log.Println("init DB connect success")
 	}
-	db.LogMode(true)
+	db.LogMode(true) //开启sql记录
 	db.SingularTable(true)
 
 

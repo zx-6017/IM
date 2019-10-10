@@ -12,6 +12,7 @@ func Router(router *gin.Engine){
 	{
 		api.GET("/create",controllers.Create)
 		api.GET("/friendrelation",controllers.FriendRelation)
+		api.GET("/loginfo",controllers.GetLogInfo)
 	}
 
 

@@ -24,10 +24,15 @@ type RelationAge struct {
 		Age int
 }
 
-func (user UserInfo) GetOneUser(id int)UserInfo{
+func (UserInfo) GetOneUser(id int)UserInfo{
 	var user_info UserInfo
 	helpers.DB.Where("id = ?",id).Find(&user_info)
 	return user_info;
+}
+func (UserInfo) GetUserByIds(ids []string)[]UserInfo{
+	var infos []UserInfo
+	helpers.DB.Where("id in (?)",ids).Find(&infos)
+	return infos
 }
 
 func (UserInfo) GetUnFriendRelationByTimezone(timezone string) []RelationAge{

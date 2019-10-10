@@ -12,25 +12,23 @@ import (
 	"strconv"
 	"strings"
 )
-
-// 文件操作练习
-func GetLogInfo(request *gin.Context){
-	log_file := "/Users/zx/Documents/my_setting/multihello.log"
-
-	err, infos:= readLine(log_file)
-	fmt.Println(err)
-	for _,value := range infos {
-		fmt.Println(value)
-	}
-
-
-
-}
 type add_info struct {
 	Receive_uid string
 	Send_uid string
 	From string
 }
+// 文件操作练习
+func GetLogInfo(request *gin.Context){
+	log_file := "/Users/zx/Documents/my_setting/multihello.log"
+
+	err, infos:= readLine(log_file)
+	if err != nil{
+		fmt.Println(err)
+		return
+	}
+	request.JSON(200,infos)
+}
+
 func readLine(filePath string) (error,[]string) {
 	f,err := os.Open(filePath)
 	defer f.Close()

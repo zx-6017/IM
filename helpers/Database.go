@@ -2,6 +2,7 @@ package helpers
 
 import (
 	."IM/config"
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"log"
@@ -40,7 +41,9 @@ func initDB(){
 		DB = db
 		log.Println("init DB connect success")
 	}
-	db.LogMode(true) //开启sql记录
+	if gin.Mode() == "debug"{
+		db.LogMode(true) //开启sql记录
+	}
 	db.SingularTable(true)
 
 

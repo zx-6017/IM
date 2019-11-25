@@ -1,6 +1,8 @@
 package routers
 
 import (
+	"IM/chatroom/client"
+	"IM/chatroom/server"
 	"IM/controllers"
 	"IM/helpers"
 	"IM/middlewares"
@@ -9,18 +11,15 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
-func Router(router *gin.Engine){
+func Router(router *gin.Engine) {
 
 	router.GET("favicon.ico", func(request *gin.Context) {
 		request.Status(200)
 	})
 
-	api := router.Group("/api").Use(middlewares.Request())
+	test := router.Group("/test").Use(middlewares.Request())
 	{
-		api.GET("/create",controllers.Create)
-		api.GET("/friendrelation",controllers.FriendRelation)
-		api.GET("/loginfo",controllers.GetLogInfo)
-		api.GET("/test", func(request *gin.Context) {
+		test.GET("/redis", func(request *gin.Context) {
 
 			redisCon := helpers.RedisPool.Get()
 
@@ -39,6 +38,30 @@ func Router(router *gin.Engine){
 				"name":name,
 			})
 		})
+		test.GET("/mail", func(request *gin.Context) {
+
+			mailTo := []string{
+				"zhangxiao@wukongtv.com",
+			}
+			fmt.Println(mailTo[2])
+			//subject := "Gin Im err..."
+			//body := "err"
+			//helpers.SendMailSmtp(mailTo,subject,body)
+		})
+	}
+
+
+	api := router.Group("/api").Use(middlewares.Request())
+	{
+		api.GET("/create",controllers.Create)
+		api.GET("/friendrelation",controllers.FriendRelation)
+		api.GET("/loginfo",controllers.GetLogInfo)
+	}
+
+	chat := router.Group("/chat").Use(middlewares.Request())
+	{
+		chat.GET("/server",server.Server)
+		chat.GET("/client",client.Client)
 	}
 
 

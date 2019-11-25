@@ -1,9 +1,13 @@
 package middlewares
 
 import (
+	"IM/config"
 	"IM/helpers"
+	"fmt"
 	"github.com/astaxie/beego/logs"
 	"github.com/gin-gonic/gin"
+	"runtime/debug"
+	"strings"
 	"time"
 )
 
@@ -14,6 +18,8 @@ func Request() gin.HandlerFunc{
 		startTime := time.Now()
 
 		logs.Info("request start : %s %s",traceId,startTime)
+
+		defer errEmail(context)
 
 		context.Next()
 
@@ -27,10 +33,35 @@ func Request() gin.HandlerFunc{
 			ua = context.Request.UserAgent()
 		)
 
+
 		logs.Info("request end : %s %s %d %s %s %s %d %s",traceId,now,duration,request,host,clientIp,code,ua)
 
 
 
 
 	}
+}
+
+func errEmail(request *gin.Context){
+	err := recover()
+	if err ==nil{
+		return
+	}
+
+	DebugStack := ""
+
+	for _,v := range strings.Split(string(debug.Stack()),"\n"){
+		DebugStack += v
+	}
+	subject := "【重要错误】项目出错!!! "
+	body := strings.ReplaceAll(MailTemplate, "{ErrorMsg}", fmt.Sprintf("%s", err))
+	body  = strings.ReplaceAll(body, "{RequestTime}", "Requesttime")
+
+	body  = strings.ReplaceAll(body, "{RequestURL}", request.Request.Method + "  " + request.Request.Host + request.Request.RequestURI)
+	body  = strings.ReplaceAll(body, "{RequestUA}", request.Request.UserAgent())
+	body  = strings.ReplaceAll(body, "{RequestIP}", request.ClientIP())
+	body  = strings.ReplaceAll(body, "{DebugStack}", DebugStack)
+
+	helpers.SendMail(config.Conf.Strings("MAIL_RECEIVE"),subject,body)
+
 }

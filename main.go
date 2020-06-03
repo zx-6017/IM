@@ -15,9 +15,9 @@ import (
 func main(){
 
 
-	gin.SetMode(gin.DebugMode);
+	gin.SetMode(gin.DebugMode)
 
-	engine := gin.Default();
+	engine := gin.Default()
 	engine.Use(gin.Recovery())
 	//引入路由
 	routers.Router(engine)

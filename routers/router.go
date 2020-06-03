@@ -1,8 +1,6 @@
 package routers
 
 import (
-	"IM/chatroom/client"
-	"IM/chatroom/server"
 	"IM/controllers"
 	"IM/helpers"
 	"IM/middlewares"
@@ -13,10 +11,12 @@ import (
 
 func Router(router *gin.Engine) {
 
+	//web 页面 ico
 	router.GET("favicon.ico", func(request *gin.Context) {
 		request.Status(200)
 	})
 
+	//平常测试接口
 	test := router.Group("/test").Use(middlewares.Request())
 	{
 		test.GET("/redis", func(request *gin.Context) {
@@ -48,21 +48,26 @@ func Router(router *gin.Engine) {
 			//body := "err"
 			//helpers.SendMailSmtp(mailTo,subject,body)
 		})
+		test.GET("/create",controllers.Create)
+		test.GET("/friendrelation",controllers.FriendRelation)
+		test.GET("/loginfo",controllers.GetLogInfo)
 	}
 
 
-	api := router.Group("/api").Use(middlewares.Request())
+
+	//// 测试 聊天室
+	//chat := router.Group("/chat").Use(middlewares.Request())
+	//{
+	//	chat.GET("/server",server.Server)
+	//	chat.GET("/client",client.Client)
+	//}
+
+
+	//yome 测试
+	yome := router.Group("/api").Use(middlewares.Request())
 	{
-		api.GET("/create",controllers.Create)
-		api.GET("/friendrelation",controllers.FriendRelation)
-		api.GET("/loginfo",controllers.GetLogInfo)
-	}
+		yome.POST("/tool/imcallback",controllers.ImCallBack)
 
-	chat := router.Group("/chat").Use(middlewares.Request())
-	{
-		chat.GET("/server",server.Server)
-		chat.GET("/client",client.Client)
 	}
-
 
 }

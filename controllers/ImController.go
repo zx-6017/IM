@@ -1,11 +1,25 @@
 package controllers
 
 import (
+	"IM/config"
 	"IM/models"
+	"fmt"
 	"github.com/gin-gonic/gin"
 )
 
+type ImAction struct {
+	State_StateChange string
+	C2C_CallbackBeforeSendMsg string
+}
 
+func (this ImAction) CallbackBeforeSendMsg(){
+
+}
+
+
+func init(){
+
+}
 
 func Create(request *gin.Context){
 	id, exist := request.GetQuery("id")
@@ -39,6 +53,33 @@ func Create(request *gin.Context){
 	})
 
 
+}
 
+
+
+func ImCallBack(request *gin.Context){
+	sdk_appid ,exist := request.GetQuery("SdkAppid")
+
+	if !exist || sdk_appid != config.Conf.String("SDK_APP_ID"){
+		request.JSON(200,gin.H{
+			"ActionStatus":"FAIL",
+			"ErrorCode":1,
+			"ErrorInfo":"SDK APP ID ERROR",
+		})
+	}
+
+	CallbackCommand,exist := request.GetQuery("CallbackCommand")
+	fmt.Println(CallbackCommand)
+	//if !exist || ImAction.CallbackCommand != {
+	//	request.JSON(200,gin.H{
+	//		"ActionStatus":"FAIL",
+	//		"ErrorCode":1,
+	//		"ErrorInfo":"IM ACTION ERROR",
+	//	})
+	//}
+
+}
+
+func reflect(b interface{},action string){
 
 }

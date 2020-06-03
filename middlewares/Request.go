@@ -44,7 +44,7 @@ func Request() gin.HandlerFunc{
 
 func errEmail(request *gin.Context){
 	err := recover()
-	if err ==nil{
+	if err == nil{
 		return
 	}
 

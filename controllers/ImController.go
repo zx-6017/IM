@@ -2,34 +2,29 @@ package controllers
 
 import (
 	"IM/config"
+	"IM/controllers/Struct"
+	"IM/helpers"
 	"IM/models"
+	"github.com/gomodule/redigo/redis"
+	"strings"
+
+	_"IM/models"
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 )
-
-type ImAction struct {
-	State_StateChange string
-	C2C_CallbackBeforeSendMsg string
-}
-
-func (this ImAction) CallbackBeforeSendMsg(){
-
-}
-
-
-func init(){
-
-}
 
 func Create(request *gin.Context){
 	id, exist := request.GetQuery("id")
 	if !exist {
 		id = "id is not exist!"
+		return
 	}
 	info ,exist := request.GetQuery("info")
 
 	if !exist{
 		info = "info is not exist"
+		return
 	}
 
 	admin_im_info := models.AdminImInfo{}
@@ -68,18 +63,75 @@ func ImCallBack(request *gin.Context){
 		})
 	}
 
-	CallbackCommand,exist := request.GetQuery("CallbackCommand")
-	fmt.Println(CallbackCommand)
-	//if !exist || ImAction.CallbackCommand != {
-	//	request.JSON(200,gin.H{
-	//		"ActionStatus":"FAIL",
-	//		"ErrorCode":1,
-	//		"ErrorInfo":"IM ACTION ERROR",
-	//	})
-	//}
+	//CallbackCommand,exist := request.GetQuery("CallbackCommand")
 
-}
+	data,data_err := request.GetRawData()
+	if data_err != nil{
+		request.JSON(200,gin.H{
+			"ActionStatus":"FAIL",
+			"ErrorCode":1,
+			"ErrorInfo":"Get Data Body error" + data_err.Error(),
+		})
+	}
 
-func reflect(b interface{},action string){
+	var data_info  Struct.Data_struct
+
+	json_err := json.Unmarshal(data,&data_info)
+	if json_err != nil{
+		fmt.Println("json post data err",json_err.Error())
+		return
+	}
+	//sender := helpers.GetUidByIdentify(data_info.From_Account)
+	//receiver := helpers.GetUidByIdentify(data_info.To_Account)
+
+	dirty_words := []models.ImDirtyWord{}
+	cache_imDirtyWord,err := helpers.RedisPool.Get().Do("get","im_dirty_word")
+
+	if err != nil{
+		fmt.Println("reids cache dirty_words get err " , err.Error())
+	}
+
+	if cache_imDirtyWord == nil { //没有缓存值
+		model_imdirtyword := models.ImDirtyWord{}
+		dirty_words = model_imdirtyword.All_Infos()
+		cache_imDirtyWord, _ = json.Marshal(dirty_words)
+		_,save_redis_err :=helpers.RedisPool.Get().Do("set","im_dirty_word",cache_imDirtyWord)
+		if save_redis_err  != nil{
+			fmt.Println("save redis cache im_dirty_word err",save_redis_err.Error())
+		}
+	}
+	cache_imDirtyWord_byte ,_:= redis.Bytes(cache_imDirtyWord,nil)
+	json_err  = json.Unmarshal(cache_imDirtyWord_byte,&dirty_words)
+	if json_err != nil{
+		fmt.Println("json decode err",json_err.Error())
+	}
+
+
+	msg_data := Struct.Msg_data{}
+
+	for _,msgbody := range data_info.MsgBody {
+		 if msgbody.MsgType != "TIMCustomElem"{
+		 	continue
+		 }
+		 err =json.Unmarshal([]byte(msgbody.MsgContent.Data),&msg_data)
+		 if err != nil{
+		 	fmt.Println("json decode err",err.Error())
+		 	continue
+		 }
+		 text := msg_data.PrimaryText
+		 for _,word_info := range dirty_words{
+			 if strings.IndexAny(text,word_info.Word) != -1 {
+			 	request.JSON(200,gin.H{
+					 "ActionStatus":"FAIL",
+					 "ErrorCode":1,
+					 "ErrorInfo":"dirty word " + word_info.Word ,
+				 })
+			 	return
+			 }
+		 }
+
+	}
+
+
 
 }
